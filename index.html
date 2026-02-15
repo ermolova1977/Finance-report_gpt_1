@@ -1,0 +1,167 @@
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Финансовый отчёт • 3D версия</title>
+
+<!-- ECharts + 3D -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  background:#0b1020;
+  color:#eef1ff;
+  font-family:Segoe UI,Arial;
+}
+.wrap{max-width:1200px;margin:auto;padding:30px}
+.section{margin-top:40px}
+h2{margin-bottom:20px}
+.chart{
+  height:420px;
+  background:#111a33;
+  border-radius:18px;
+  padding:10px;
+  box-shadow:0 20px 40px rgba(0,0,0,.5);
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<h1>🚨 Финансовый отчёт для собственников</h1>
+<p>3D-визуализация ключевых рисков и капитала</p>
+
+<div class="section">
+<h2>1. Кредиторская задолженность (3D)</h2>
+<div id="ap3d" class="chart"></div>
+</div>
+
+<div class="section">
+<h2>2. Проектное финансирование (3D)</h2>
+<div id="pf3d" class="chart"></div>
+</div>
+
+<div class="section">
+<h2>3. Продано vs Остаток (3D)</h2>
+<div id="sales3d" class="chart"></div>
+</div>
+
+<div class="section">
+<h2>4. Готовность проектов (3D)</h2>
+<div id="ready3d" class="chart"></div>
+</div>
+
+</div>
+
+<script>
+
+// ---------------- DATA ----------------
+
+const apData = [
+  ['Приоритет 1', 77.1],
+  ['Приоритет 2', 12.4],
+  ['Приоритет 3', 29.9],
+];
+
+const pfData = [
+  ['Выбрано', 863.6],
+  ['Остаток лимита', 192.2],
+];
+
+const salesData = [
+  ['Молодёжный продано', 3732],
+  ['Молодёжный остаток', 1385],
+  ['Донецкий продано', 2960],
+  ['Донецкий остаток', 1335],
+];
+
+const readyData = [
+  ['Молодёжный', 32.5],
+  ['Донецкий', 27.5],
+];
+
+// ------------- 3D BAR FUNCTION -------------
+
+function build3DBar(domId, data, maxY=1000){
+
+  const chart = echarts.init(document.getElementById(domId));
+
+  const option = {
+    backgroundColor: '#111a33',
+    tooltip: {},
+    xAxis3D: {
+      type: 'category',
+      data: data.map(d=>d[0]),
+      axisLabel:{color:'#fff'}
+    },
+    yAxis3D: {
+      type: 'value',
+      max:maxY,
+      axisLabel:{color:'#fff'}
+    },
+    zAxis3D: {
+      type: 'value'
+    },
+    grid3D: {
+      boxWidth: 200,
+      boxDepth: 80,
+      light: {
+        main: {intensity:1.2, shadow:true},
+        ambient: {intensity:0.3}
+      }
+    },
+    series: [{
+      type: 'bar3D',
+      data: data.map((d,i)=>[i, d[1], 0]),
+      shading: 'lambert',
+      label:{
+        show:true,
+        formatter:(p)=>p.value[1],
+        textStyle:{color:'#fff'}
+      },
+      itemStyle:{
+        color:'#fb7185'
+      }
+    }]
+  };
+
+  chart.setOption(option);
+}
+
+// ------------- 3D PIE (Donut) -------------
+
+function build3DPie(domId, data){
+
+  const chart = echarts.init(document.getElementById(domId));
+
+  chart.setOption({
+    backgroundColor:'#111a33',
+    tooltip:{},
+    series: [{
+      type: 'pie',
+      radius: ['40%', '70%'],
+      roseType: 'radius',
+      data: data.map(d=>({name:d[0], value:d[1]})),
+      itemStyle:{
+        shadowBlur:20,
+        shadowColor:'rgba(0,0,0,0.6)'
+      },
+      label:{color:'#fff'}
+    }]
+  });
+}
+
+// ----------- BUILD CHARTS ------------
+
+build3DBar('ap3d', apData, 120);
+build3DBar('pf3d', pfData, 1000);
+build3DBar('sales3d', salesData, 4000);
+build3DBar('ready3d', readyData, 100);
+
+</script>
+
+</body>
+</html>
